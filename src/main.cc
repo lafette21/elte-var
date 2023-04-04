@@ -11,7 +11,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] const char *argv[])
     try {
         var::window window("Window", { 255, 255 });
 
-        window.run([] { std::cout << "cica\n"; });
+        window.run([&window] { window.widget("Foo").text("{}", "cica");} );
     } catch (const std::exception& ex) {
         spdlog::error("{}", ex.what());
     }

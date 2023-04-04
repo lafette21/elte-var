@@ -26,9 +26,9 @@ window::window(const std::string& title, vec2 pos)
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 
-    ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+    // ImGuiIO& io = ImGui::GetIO();
+    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
     // io.Fonts->AddFontFromFileTTF("res/ProggyClean.ttf", 20);
 
@@ -36,7 +36,7 @@ window::window(const std::string& title, vec2 pos)
 
     ImGui_ImplGlfw_InitForOpenGL(_window, true);
 
-    ImGui_ImplOpenGL3_Init(_glslVersion.data());
+    ImGui_ImplOpenGL2_Init(); // _glslVersion.data());
 }
 
 window::window(window&& other) noexcept {
@@ -52,7 +52,7 @@ window::~window() {
         return;
     }
 
-    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplOpenGL2_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 

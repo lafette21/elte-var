@@ -2,10 +2,8 @@ set(EXEC_NAME elte_var)
 
 add_library(imgui_backend
     ${CMAKE_SOURCE_DIR}/res/bindings/imgui_impl_glfw.cpp
-    ${CMAKE_SOURCE_DIR}/res/bindings/imgui_impl_opengl3.cpp
+    ${CMAKE_SOURCE_DIR}/res/bindings/imgui_impl_opengl2.cpp
 )
-
-code_analysis(imgui_backend PRIVATE)
 
 add_executable(${EXEC_NAME}
     main.cc

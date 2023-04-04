@@ -2,7 +2,7 @@
 #define WINDOW_H
 
 #include "bindings/imgui_impl_glfw.h"
-#include "bindings/imgui_impl_opengl3.h"
+#include "bindings/imgui_impl_opengl2.h"
 #include "types.h"
 
 #include <fmt/core.h>
@@ -61,7 +61,7 @@ public:
      */
     template <typename ...Args>
     widget& text(const std::string& fmt, Args&&... args) {
-        ImGui::Text(fmt::vformat(fmt, fmt::make_format_args(std::forward<Args>(args))...).c_str());
+        ImGui::Text("%s", fmt::vformat(fmt, fmt::make_format_args(std::forward<Args>(args))...).c_str());
         return *this;
     }
 
@@ -156,7 +156,7 @@ public:
     main_menu& operator=(const main_menu&) = delete;
     main_menu& operator=(main_menu&&) = delete;
 
-    menu menu(const std::string& name) {
+    ui::menu menu(const std::string& name) {
         return ui::menu(name);
     }
 
@@ -224,7 +224,7 @@ void window::run(std::invocable auto&& callback) {
     while (not glfwWindowShouldClose(_window)) {
         glfwPollEvents();
 
-        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplOpenGL2_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         clear_color(colors::black);
@@ -232,7 +232,7 @@ void window::run(std::invocable auto&& callback) {
         std::invoke(callback);
 
         ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(_window);
     }
 }
