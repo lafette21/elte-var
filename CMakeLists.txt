@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.16...3.23)
 
 # Set the project name and language
-project(myproject
+project(elte-var
     VERSION 0.0.1
     DESCRIPTION ""
-    HOMEPAGE_URL "%%myurl%%"
+    HOMEPAGE_URL "https://github.com/laFette21/elte-var"
     LANGUAGES CXX C
 )
 
@@ -22,6 +22,9 @@ set_project_warnings(project_warnings)
 
 # Add the src directory
 add_subdirectory(src)
+
+# Copy pitch.png to build folder
+configure_file(res/pitch.png ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/res/pitch.png COPYONLY)
 
 # Enable testing
 enable_testing()
