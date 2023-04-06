@@ -1,4 +1,4 @@
-#include "window.h"
+#include "app.h"
 
 #include <fmt/format.h>
 
@@ -9,9 +9,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] const char *argv[])
     std::puts(fmt::format("Example {}", "project").c_str());
 
     try {
-        var::window window("Window", { 255, 255 });
+        var::app app;
 
-        window.run([&window] { window.widget("Foo").text("{}", "cica");} );
+        app.start();
+
     } catch (const std::exception& ex) {
         spdlog::error("{}", ex.what());
     }

@@ -1,10 +1,10 @@
-#include "window.h"
+#include "gui.h"
 
 namespace var {
 
-window::window(const std::string& title, vec2 pos)
+gui::gui(const std::string& title, vec2 size)
     : _glslVersion(GLSLVersion())
-    , _dimensions(pos)
+    , _dimensions(size)
 {
     glfwSetErrorCallback([](int err, const char* msg) { spdlog::error("{} {}", err, msg); });
 
@@ -12,7 +12,7 @@ window::window(const std::string& title, vec2 pos)
         throw std::runtime_error("Failed to initialize GUI!");
     }
 
-    _window = glfwCreateWindow(static_cast<int>(pos.x), static_cast<int>(pos.y), title.c_str(), nullptr, nullptr);
+    _window = glfwCreateWindow(static_cast<int>(size.x), static_cast<int>(size.y), title.c_str(), nullptr, nullptr);
     if (_window == nullptr) {
         throw std::runtime_error("Failed to initialize window!");
     }
@@ -39,7 +39,7 @@ window::window(const std::string& title, vec2 pos)
     ImGui_ImplOpenGL2_Init(); // _glslVersion.data());
 }
 
-window::window(window&& other) noexcept {
+gui::gui(gui&& other) noexcept {
     _window = other._window;
     _glslVersion = other._glslVersion;
     _dimensions = other._dimensions;
@@ -47,7 +47,7 @@ window::window(window&& other) noexcept {
     other._window = nullptr;
 }
 
-window::~window() {
+gui::~gui() {
     if (_window == nullptr) {
         return;
     }
@@ -60,7 +60,7 @@ window::~window() {
     glfwTerminate();
 }
 
-std::string_view window::GLSLVersion() {
+std::string_view gui::GLSLVersion() {
 #if defined(IMGUI_IMPL_OPENGL_ES2)
     // GL ES 2.0 + GLSL 100
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
