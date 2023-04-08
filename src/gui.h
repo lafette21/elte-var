@@ -110,7 +110,7 @@ public:
      */
     template <typename ...Args>
     window& text(const std::string& fmt, Args&&... args) {
-        ImGui::Text("%s", fmt::vformat(fmt, fmt::make_format_args(std::forward<Args>(args))...).c_str());
+        ImGui::Text("%s", fmt::vformat(fmt, fmt::make_format_args(std::forward<Args>(args)...)).c_str());
         return *this;
     }
 
@@ -181,8 +181,13 @@ public:
         return *this;
     }
 
-    window& sameline() {
+    window& same_line() {
         ImGui::SameLine();
+        return *this;
+    }
+
+    window& dummy(const vec2& size) {
+        ImGui::Dummy(size);
         return *this;
     }
 

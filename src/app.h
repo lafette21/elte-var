@@ -54,10 +54,24 @@ public:
 
                     _state.showImage = true;
                 })
-                .item("Save", [] { spdlog::info("Save"); });
+                .item("Save", [this] { _model.save(""); });
             _gui.main_menu().menu("Edit")
-                .item("Generate", [] { spdlog::info("Generate"); })
-                .item("Reset", [] { spdlog::info("Reset"); });
+                .item("Generate", [this] {
+                    try {
+                        auto [image, pitch] = _model.generate();
+                        cv::cvtColor(image, image, cv::COLOR_RGBA2BGR);
+                        cv::imshow("Pitch result", pitch);
+                        cv::imshow("Image result", image);
+                        cv::waitKey(0);
+                        cv::destroyAllWindows();
+                    } catch (const std::exception& ex) {
+                        spdlog::error("{}", ex.what());
+                    }
+                })
+                .item("Reset", [this] {
+                    _model.reset();
+                    renderImages();
+                });
 
             // State
             _state.width = _gui.width();
@@ -65,8 +79,8 @@ public:
 
             // Windows
             _gui.window("Debug", nullptr, ui::window_flag::None)
-                .text(fmt::format("Logic time: {:.3f}ms", _delta.count() / 1'000'000.0))
-                .text(fmt::format("Mouse pos: x={} y={}", ImGui::GetMousePos().x, ImGui::GetMousePos().y));
+                .text("Logic time: {:.3f}ms", _delta.count() / 1'000'000.0)
+                .text("Mouse pos: x={} y={}", ImGui::GetMousePos().x, ImGui::GetMousePos().y);
 
             _gui.window("Settings", nullptr, ui::window_flag::NoResize)
                 .size(300, 150)
@@ -90,28 +104,37 @@ public:
                     .image(
                         _state.imageTexture,
                         _state.pos = ImGui::GetCursorScreenPos(),
-                        _state.contentSize = ImGui::GetContentRegionAvail() + _state.pos
+                        _state.imageContentSize = ImGui::GetContentRegionAvail() + _state.pos
                     )
                     .allow_overlap()
                     .invisible_button("Image sensor", ImGui::GetContentRegionAvail(), [this] {
                         const vec2 mousePos = ImGui::GetMousePos();
                         const vec2 mousePosInWindow = mousePos - _state.windowPos - _state.curStartPos;
                         const auto image = _model.image();
-                        const double normX = static_cast<double>((image.cols / _state.contentSize.x) * mousePosInWindow.x);
-                        const double normY = static_cast<double>((image.rows / _state.contentSize.y) * mousePosInWindow.y);
+                        const double normX = static_cast<double>((image.cols / _state.imageContentSize.x) * mousePosInWindow.x);
+                        const double normY = static_cast<double>((image.rows / _state.imageContentSize.y) * mousePosInWindow.y);
 
-                        if (_state.imagePointsCurrentIdx != -1) {
-                            _model.imagePoints()[_state.imagePointsCurrentIdx] = { normX, normY };
+                        if (_state.setAttacker) {
+                            _model.attackerPos() = { static_cast<float>(normX), static_cast<float>(normY) };
+                            _state.setAttacker = false;
+                        } else if (_state.setDefender) {
+                            _model.defenderPos() = { static_cast<float>(normX), static_cast<float>(normY) };
+                            _state.setDefender = false;
                         } else {
-                            if (!_state.availableImagePointIdx.empty()) {
-                                _model.imagePoints()[_state.availableImagePointIdx.top()] = { normX, normY };
-                                _state.availableImagePointIdx.pop();
+                            if (_state.imagePointsCurrentIdx != -1) {
+                                _model.imagePoints()[_state.imagePointsCurrentIdx] = { normX, normY };
                             } else {
-                                _model.imagePoints()[_state.nextAvailImagePointIdx++] = { normX, normY };
+                                if (!_state.availableImagePointIdx.empty()) {
+                                    _model.imagePoints()[_state.availableImagePointIdx.top()] = { normX, normY };
+                                    _state.availableImagePointIdx.pop();
+                                } else {
+                                    _model.imagePoints()[_state.nextAvailImagePointIdx++] = { normX, normY };
+                                }
                             }
                         }
 
-                        // draw
+                        _model.draw();
+                        renderImages();
                     });
             }
 
@@ -135,8 +158,8 @@ public:
                     const vec2 mousePos = ImGui::GetMousePos();
                     const vec2 mousePosInWindow = mousePos - _state.windowPos - _state.curStartPos;
                     const auto pitch = _model.pitch();
-                    const double normX = static_cast<double>((pitch.cols / _state.contentSize.x) * mousePosInWindow.x);
-                    const double normY = static_cast<double>((pitch.rows / _state.contentSize.y) * mousePosInWindow.y);
+                    const double normX = static_cast<double>((pitch.cols / _state.imageContentSize.x) * mousePosInWindow.x);
+                    const double normY = static_cast<double>((pitch.rows / _state.imageContentSize.y) * mousePosInWindow.y);
 
                     if (_state.pitchPointsCurrentIdx != -1) {
                         _model.pitchPoints()[_state.pitchPointsCurrentIdx] = { normX, normY };
@@ -149,7 +172,8 @@ public:
                         }
                     }
 
-                    // draw
+                    _model.draw();
+                    renderImages();
                 });
             _gui.window("Image points", nullptr, ui::window_flag::NoResize)
                 .size(300, 200)
@@ -170,13 +194,14 @@ public:
                     }
                 })
                 .button("Remove focus", [this] { _state.imagePointsCurrentIdx = -1; })
-                .sameline()
+                .same_line()
                 .button("Remove selected", [this] {
                     if (_state.imagePointsCurrentIdx != -1) {
                         _model.imagePoints().erase(_state.imagePointsCurrentIdx);
                         _state.availableImagePointIdx.push(_state.imagePointsCurrentIdx);
                         _state.imagePointsCurrentIdx = -1;
-                        // TODO: draw
+                        _model.draw();
+                        renderImages();
                     }
                 });
             _gui.window("Pitch points", nullptr, ui::window_flag::NoResize)
@@ -198,18 +223,53 @@ public:
                     }
                 })
                 .button("Remove focus", [this] { _state.pitchPointsCurrentIdx = -1; })
-                .sameline()
+                .same_line()
                 .button("Remove selected", [this] {
                     if (_state.pitchPointsCurrentIdx != -1) {
                         _model.pitchPoints().erase(_state.pitchPointsCurrentIdx);
                         _state.availablePitchPointIdx.push(_state.pitchPointsCurrentIdx);
                         _state.pitchPointsCurrentIdx = -1;
-                        // TODO: draw
+                        _model.draw();
+                        renderImages();
                     }
                 });
+            _gui.window("Players", nullptr, ui::window_flag::NoResize)
+                .size(200, 160)
+                .text("Attacker")
+                .text(
+                    "x={:.0f} y={:.0f}",
+                    _model.attackerPos().x / (_model.image().cols / _state.imageContentSize.x),
+                    _model.attackerPos().y / (_model.image().rows / _state.imageContentSize.y)
+                )
+                .button("Set##Attacker", [this] { _state.setAttacker = true; })
+                .same_line()
+                .button("Reset##Attacker", [this] { _model.attackerPos() = { -1, -1 }; })
+                .dummy({0, 10})
+                .text("Defender")
+                .text(
+                    "x={:.0f} y={:.0f}",
+                    _model.defenderPos().x / (_model.image().cols / _state.imageContentSize.x),
+                    _model.defenderPos().y / (_model.image().rows / _state.imageContentSize.y)
+                )
+                .button("Set##Defender", [this] { _state.setDefender = true; })
+                .same_line()
+                .button("Reset##Defender", [this] { _model.defenderPos() = { -1, -1 }; });
 
-                _delta = std::chrono::steady_clock().now().time_since_epoch() - _lastUpdate;
+            _delta = std::chrono::steady_clock().now().time_since_epoch() - _lastUpdate;
         });
+    }
+
+    void renderUI() {}
+
+    void renderImages() {
+        auto image = _model.image().clone();
+        auto pitch = _model.pitch().clone();
+
+        glBindTexture(GL_TEXTURE_2D, _state.imageTexture);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, image.cols, image.rows, GL_RGBA, GL_UNSIGNED_BYTE, image.ptr());
+
+        glBindTexture(GL_TEXTURE_2D, _state.pitchTexture);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, pitch.cols, pitch.rows, GL_RGBA, GL_UNSIGNED_BYTE, pitch.ptr());
     }
 
 private:
@@ -217,7 +277,7 @@ private:
         MinPriorQueue availableImagePointIdx    = {};
         MinPriorQueue availablePitchPointIdx    = {};
         GLuint imageTexture, pitchTexture       = {};
-        vec2 pos, availContent, windowPos, curStartPos, pitchContentSize, contentSize;
+        vec2 pos, availContent, windowPos, curStartPos, pitchContentSize, imageContentSize;
         int nextAvailImagePointIdx = 0;
         int nextAvailPitchPointIdx = 0;
         int imagePointsCurrentIdx   = -1;
@@ -226,6 +286,8 @@ private:
         bool showImage              = false;
         bool isImagePointSelected   = false;
         bool isPitchPointSelected   = false;
+        bool setAttacker = false;
+        bool setDefender = false;
     };
 
     std::chrono::nanoseconds _lastUpdate, _delta;
