@@ -22,16 +22,24 @@ public:
 
     std::map<int, cv::Point2d>& imagePoints() { return _imagePoints; }
     std::map<int, cv::Point2d>& pitchPoints() { return _pitchPoints; }
+    std::string& imagePath() { return _imagePath; }
+    cv::Mat& image() { return _image; }
     cv::Mat& pitch() { return _pitch; }
     vec2& pitchSize() { return _pitchSize; }
 
-    void load() {}
+    void load() {
+        _image = cv::imread(_imagePath);
+        _imageSave = _image.clone();
+
+        cv::cvtColor(_image, _image, cv::COLOR_BGR2RGBA);
+    }
 
 private:
-    std::map<int, cv::Point2d> _imagePoints = { {1, {0, 0}}, {2, {6, 9}} };
-    std::map<int, cv::Point2d> _pitchPoints = { {1, {0, 0}}, {2, {6, 9}} };
+    std::map<int, cv::Point2d> _imagePoints;
+    std::map<int, cv::Point2d> _pitchPoints;
+    std::string _imagePath;
     cv::Mat _image, _pitch, _imageSave, _pitchSave;
-    vec2 _pitchSize                         = {};
+    vec2 _pitchSize = {};
 };
 
 } // namespace var

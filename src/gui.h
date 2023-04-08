@@ -62,10 +62,6 @@ enum class window_flag {
  */
 class window {
 public:
-    /*window(const std::string& title) {
-        ImGui::Begin(title.c_str());
-    }*/
-
     window(const std::string& title, bool* isOpen = nullptr, window_flag flag = window_flag::None) {
         ImGui::Begin(title.c_str(), isOpen, static_cast<int>(flag)); // TODO: More flag handling
     }
@@ -201,7 +197,6 @@ public:
 private:
 
 };
-
 /*
 class popup {
 public:
@@ -225,7 +220,6 @@ private:
     bool _active;
 };
 */
-
 class menu {
 public:
     menu(const std::string& name):
@@ -280,19 +274,9 @@ public:
     }
 
     /**
-     * @brief   Create a menu item
-     */
-    menu& item(const std::string& name, bool enabled, bool* selected = nullptr, const std::string& shortcut = "") {
-        if (_active) {
-            ImGui::MenuItem(name.c_str(), shortcut == "" ? nullptr : shortcut.c_str(), selected, enabled);
-        }
-        return *this;
-    }
-
-    /**
      * @brief   Create a menu item with a callback
      */
-    menu& item(const std::string& name, std::invocable auto&& callback, bool* selected = nullptr, const std::string& shortcut = "") {
+    menu& item(const std::string& name, std::invocable auto&& callback = [] {}, bool* selected = nullptr, const std::string& shortcut = "") {
         if (_active) {
             if (ImGui::MenuItem(name.c_str(), shortcut == "" ? nullptr : shortcut.c_str(), selected)) {
                 std::invoke(callback);
