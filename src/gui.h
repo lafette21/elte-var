@@ -5,6 +5,15 @@
 #include "bindings/imgui_impl_opengl2.h"
 #include "types.h"
 
+#define IM_VEC2_CLASS_EXTRA                                                     \
+    constexpr ImVec2(const var::vec2& obj)                                      \
+        : x(obj.x)                                                              \
+        , y(obj.y)                                                              \
+    {}                                                                          \
+    operator var::vec2() const {                                                \
+        return { x, y };                                                        \
+    }
+
 #include <fmt/core.h>
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <GLES2/gl2.h>
@@ -70,11 +79,23 @@ public:
     window& operator=(const window&) = delete;
     window& operator=(window&&)      = delete;
 
+    window& callback(std::invocable auto&& callback) {
+        std::invoke(callback);
+        return *this;
+    }
+
     /**
      * @brief   Create a button which calls the `callback` upon clicking
      */
     window& button(const std::string& name, std::invocable auto&& callback) {
         if (ImGui::Button(name.c_str())) {
+            std::invoke(callback);
+        }
+        return *this;
+    }
+
+    window& invisible_button(const std::string& name, const vec2& size, std::invocable auto&& callback) {
+        if (ImGui::InvisibleButton(name.c_str(), size)) {
             std::invoke(callback);
         }
         return *this;
@@ -141,8 +162,31 @@ public:
         return *this;
     }
 
+    window& image(GLuint texture, const vec2& upperLeft, const vec2& bottomRight) {
+        ImGui::GetWindowDrawList()->AddImage(reinterpret_cast<void*>(texture), upperLeft, bottomRight);
+        return *this;
+    }
+
+    window& listbox(const std::string& label, std::invocable auto&& callback) {
+        if (ImGui::BeginListBox(label.c_str())) {
+            std::invoke(callback);
+            ImGui::EndListBox();
+        }
+        return *this;
+    }
+
     window& size(std::size_t w, std::size_t h) {
         ImGui::SetWindowSize(ImVec2(w, h));
+        return *this;
+    }
+
+    window& allow_overlap() {
+        ImGui::SetItemAllowOverlap();
+        return *this;
+    }
+
+    window& sameline() {
+        ImGui::SameLine();
         return *this;
     }
 
@@ -328,14 +372,15 @@ public:
         return ui::window(title, isOpen, flag /*, m_caches[name]*/);
     }
 
-    [[nodiscard]] auto dimensions() const noexcept {
-        return _dimensions;
-    }
+    [[nodiscard]] auto dimensions() const noexcept { return _dimensions; }
+    [[nodiscard]] auto height() const noexcept { return _height; }
+    [[nodiscard]] auto width() const noexcept { return _width; }
 
 private:
-    GLFWwindow* _window = nullptr;
     std::string_view _glslVersion;
+    GLFWwindow* _window = nullptr;
     vec2 _dimensions;
+    int _width, _height;
 
     // std::map<std::string, ui_state> _caches;       // TODO(perf,data-structure): flatmap
 
@@ -349,6 +394,7 @@ private:
 void gui::run(std::invocable auto&& callback) {
     while (not glfwWindowShouldClose(_window)) {
         glfwPollEvents();
+        glfwGetWindowSize(_window, &_width, &_height);
 
         ImGui_ImplOpenGL2_NewFrame();
         ImGui_ImplGlfw_NewFrame();

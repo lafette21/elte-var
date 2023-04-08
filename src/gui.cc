@@ -2,9 +2,9 @@
 
 namespace var {
 
-gui::gui(const std::string& title, vec2 size)
-    : _glslVersion(GLSLVersion())
-    , _dimensions(size)
+gui::gui(const std::string& title, vec2 size):
+    _glslVersion(GLSLVersion()),
+    _dimensions(size)
 {
     glfwSetErrorCallback([](int err, const char* msg) { spdlog::error("{} {}", err, msg); });
 
