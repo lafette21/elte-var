@@ -388,7 +388,7 @@ void gui::run(std::invocable auto&& callback) {
         ImGui_ImplOpenGL2_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        clear_color(colors::black);
+        clear_color(color::black);
 
         std::invoke(callback);
 
@@ -400,10 +400,10 @@ void gui::run(std::invocable auto&& callback) {
 
 inline void gui::clear_color(const vec4& color) {
     glClearColor(
-        color.x * color.w,
-        color.y * color.w,
-        color.z * color.w,
-        color.w
+        color.r() * color.a(),
+        color.g() * color.a(),
+        color.b() * color.a(),
+        color.a()
     );
 
     glClear(GL_COLOR_BUFFER_BIT);

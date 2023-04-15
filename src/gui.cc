@@ -12,7 +12,7 @@ gui::gui(const std::string& title, vec2 size):
         throw std::runtime_error("Failed to initialize GUI!");
     }
 
-    _window = glfwCreateWindow(static_cast<int>(size.x), static_cast<int>(size.y), title.c_str(), nullptr, nullptr);
+    _window = glfwCreateWindow(static_cast<int>(size.x()), static_cast<int>(size.y()), title.c_str(), nullptr, nullptr);
     if (_window == nullptr) {
         throw std::runtime_error("Failed to initialize window!");
     }
