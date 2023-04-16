@@ -129,27 +129,29 @@ public:
 
     void draw() {
         if (not _image.empty()) {
-            cv::cvtColor(_image, _image, cv::COLOR_RGBA2BGR);
+            _image = _imageSave.clone();
+            const int ratio = _image.cols / 1000 + 3;
 
             if (_attackerPos != vec2{ -1, -1 }) {
-                cv::circle(_image, cv::Point2f(_attackerPos.x(), _attackerPos.y()), 3, cv::Scalar(0, 0, 255), 2);
+                cv::circle(_image, cv::Point2f(_attackerPos.x(), _attackerPos.y()), ratio, cv::Scalar(0, 0, 255), ratio - 1);
             }
 
             if (_defenderPos != vec2{ -1, -1 }) {
-                cv::circle(_image, cv::Point2f(_defenderPos.x(), _defenderPos.y()), 3, cv::Scalar(255, 0, 0), 2);
+                cv::circle(_image, cv::Point2f(_defenderPos.x(), _defenderPos.y()), ratio, cv::Scalar(255, 0, 0), ratio - 1);
             }
 
             for (const auto& [_, value] : _imagePoints) {
-                cv::circle(_image, value, 3, cv::Scalar(153, 51, 102), 2);
+                cv::circle(_image, value, ratio, cv::Scalar(153, 51, 102), ratio - 1);
             }
 
             cv::cvtColor(_image, _image, cv::COLOR_BGR2RGBA);
         }
 
-        cv::cvtColor(_pitch, _pitch, cv::COLOR_RGBA2BGR);
+        _pitch = _pitchSave.clone();
+        const int ratio = _pitch.cols / 1000 + 3;
 
         for (const auto& [_, value] : _pitchPoints) {
-            cv::circle(_pitch, value, 3, cv::Scalar(153, 51, 102), 2);
+            cv::circle(_pitch, value, ratio, cv::Scalar(153, 51, 102), ratio - 1);
         }
 
         cv::cvtColor(_pitch, _pitch, cv::COLOR_BGR2RGBA);
