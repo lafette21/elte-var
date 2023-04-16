@@ -104,6 +104,8 @@ public:
                     _state.windowPos = ImGui::GetWindowPos();
                     _state.availContent = ImGui::GetContentRegionAvail();
                     _state.curStartPos = ImGui::GetCursorStartPos();
+                    _state.pos = ImGui::GetCursorScreenPos();
+                    _state.imageContentSize = ImGui::GetContentRegionAvail();
                 })
                 .size(
                     static_cast<std::size_t>(_state.width / 2.1),
@@ -111,8 +113,8 @@ public:
                 )
                 .image(
                     _state.imageTexture,
-                    _state.pos = ImGui::GetCursorScreenPos(),
-                    _state.imageContentSize = ImGui::GetContentRegionAvail() + _state.pos
+                    _state.pos,
+                    _state.imageContentSize + _state.pos
                 )
                 .allow_overlap()
                 .invisible_button("Image sensor", ImGui::GetContentRegionAvail(), [this] {
@@ -132,7 +134,7 @@ public:
                         if (_state.imagePointsCurrentIdx != -1) {
                             _model.imagePoints()[_state.imagePointsCurrentIdx] = normPos;
                         } else {
-                            if (!_state.availableImagePointIdx.empty()) {
+                            if (not _state.availableImagePointIdx.empty()) {
                                 _model.imagePoints()[_state.availableImagePointIdx.top()] = normPos;
                                 _state.availableImagePointIdx.pop();
                             } else {
@@ -151,6 +153,8 @@ public:
                 _state.windowPos = ImGui::GetWindowPos();
                 _state.availContent = ImGui::GetContentRegionAvail();
                 _state.curStartPos = ImGui::GetCursorStartPos();
+                _state.pos = ImGui::GetCursorScreenPos();
+                _state.pitchContentSize = ImGui::GetContentRegionAvail();
             })
             .size(
                 static_cast<std::size_t>(_state.width / 2.1),
@@ -158,8 +162,8 @@ public:
             )
             .image(
                 _state.pitchTexture,
-                _state.pos = ImGui::GetCursorScreenPos(),
-                _state.pitchContentSize = ImGui::GetContentRegionAvail() + _state.pos
+                _state.pos,
+                _state.pitchContentSize + _state.pos
             )
             .allow_overlap()
             .invisible_button("Pitch sensor", ImGui::GetContentRegionAvail(), [this] {
@@ -172,7 +176,7 @@ public:
                 if (_state.pitchPointsCurrentIdx != -1) {
                     _model.pitchPoints()[_state.pitchPointsCurrentIdx] = normPos;
                 } else {
-                    if (!_state.availablePitchPointIdx.empty()) {
+                    if (not _state.availablePitchPointIdx.empty()) {
                         _model.pitchPoints()[_state.availablePitchPointIdx.top()] = normPos;
                         _state.availablePitchPointIdx.pop();
                     } else {
