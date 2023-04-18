@@ -12,8 +12,6 @@ opencv:with_ade=False
 opencv:with_ffmpeg=False
 opencv:with_tiff=False
 opencv:with_webp=False
-opencv:with_ffmpeg=False
-opencv:with_ade=False
 
 [generators]
 cmake
