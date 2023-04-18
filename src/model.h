@@ -94,8 +94,8 @@ public:
             cv::line(pitch, p1, p2, cv::Scalar(100, 100, 100, 255), 2);
         }
 
-        cv::circle(pitch, pitchPlayerPoints[0], 3, cv::Scalar(255, 0, 0, 255), 2);
-        cv::circle(pitch, pitchPlayerPoints[1], 3, cv::Scalar(0, 0, 255, 255), 2);
+        cv::circle(pitch, pitchPlayerPoints[0], 3, cv::Scalar(0, 0, 255, 255), 2);
+        cv::circle(pitch, pitchPlayerPoints[1], 3, cv::Scalar(255, 0, 0, 255), 2);
 
         std::vector<cv::Point2f> imageLinePoints;
 

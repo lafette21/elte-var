@@ -87,7 +87,7 @@ public:
 
     void renderWindows() {
         _gui.window("Debug", nullptr, ui::window_flag::None)
-            .text("Logic time: {:.3f}ms", _delta.count() / 1'000'000.0)
+            .text("Logic time: {:.3f}ms", static_cast<double>(_delta.count()) / 1'000'000.0)
             .text("Mouse pos: x={} y={}", ImGui::GetMousePos().x, ImGui::GetMousePos().y);
 
         _gui.window("Settings", nullptr, ui::window_flag::NoResize)
@@ -102,7 +102,6 @@ public:
             _gui.window("Image", nullptr, ui::window_flag::NoResize)
                 .callback([this] {
                     _state.windowPos = ImGui::GetWindowPos();
-                    _state.availContent = ImGui::GetContentRegionAvail();
                     _state.curStartPos = ImGui::GetCursorStartPos();
                     _state.pos = ImGui::GetCursorScreenPos();
                     _state.imageContentSize = ImGui::GetContentRegionAvail();
@@ -151,7 +150,6 @@ public:
         _gui.window("Pitch", nullptr, ui::window_flag::NoResize)
             .callback([this] {
                 _state.windowPos = ImGui::GetWindowPos();
-                _state.availContent = ImGui::GetContentRegionAvail();
                 _state.curStartPos = ImGui::GetCursorStartPos();
                 _state.pos = ImGui::GetCursorScreenPos();
                 _state.pitchContentSize = ImGui::GetContentRegionAvail();
@@ -249,12 +247,18 @@ public:
             });
 
         _gui.window("Players", nullptr, ui::window_flag::NoResize)
+            .callback([this] {
+                const auto image = _model.image();
+                const vec2 imageSize = { static_cast<float>(image.cols), static_cast<float>(image.rows) };
+                _state.attackerPos = _model.attackerPos() / (imageSize / _state.imageContentSize);
+                _state.defenderPos = _model.defenderPos() / (imageSize / _state.imageContentSize);
+            })
             .size(200, 160)
             .text("Attacker")
             .text(
                 "x={:.0f} y={:.0f}",
-                _model.attackerPos().x() / (_model.image().cols / _state.imageContentSize.x()),
-                _model.attackerPos().y() / (_model.image().rows / _state.imageContentSize.y())
+                _state.attackerPos.x(),
+                _state.attackerPos.y()
             )
             .button("Set##Attacker", [this] { _state.setAttacker = true; })
             .same_line()
@@ -263,8 +267,8 @@ public:
             .text("Defender")
             .text(
                 "x={:.0f} y={:.0f}",
-                _model.defenderPos().x() / (_model.image().cols / _state.imageContentSize.x()),
-                _model.defenderPos().y() / (_model.image().rows / _state.imageContentSize.y())
+                _state.defenderPos.x(),
+                _state.defenderPos.y()
             )
             .button("Set##Defender", [this] { _state.setDefender = true; })
             .same_line()
@@ -289,7 +293,7 @@ private:
         MinPriorQueue availableImagePointIdx    = {};
         MinPriorQueue availablePitchPointIdx    = {};
         GLuint imageTexture, pitchTexture       = {};
-        vec2 pos, availContent, windowPos, curStartPos, pitchContentSize, imageContentSize;
+        vec2 pos, windowPos, curStartPos, pitchContentSize, imageContentSize, attackerPos, defenderPos;
         int nextAvailImagePointIdx = 0;
         int nextAvailPitchPointIdx = 0;
         int imagePointsCurrentIdx   = -1;

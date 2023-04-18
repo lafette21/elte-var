@@ -19,6 +19,15 @@ struct vec2 {
 
     auto operator<=>(const vec2&) const = default;
 
+    /**
+     * @brief   Division by a scalar
+     */
+    inline vec2& operator/=(float scalar) noexcept {
+        data[0] /= scalar;
+        data[1] /= scalar;
+        return *this;
+    }
+
     operator ImVec2() const {
         return { data[0], data[1] };
     }
@@ -88,6 +97,16 @@ inline vec2 operator/(const vec2& lhs, const vec2& rhs) noexcept {
     return {
         lhs.data[0] / rhs.data[0],
         lhs.data[1] / rhs.data[1]
+    };
+}
+
+/**
+ * @brief   Division by a scalar
+ */
+inline vec2 operator/(const vec2& lhs, float rhs) noexcept {
+    return {
+        lhs.data[0] / rhs,
+        lhs.data[1] / rhs
     };
 }
 

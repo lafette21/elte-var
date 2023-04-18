@@ -172,7 +172,7 @@ public:
     }
 
     window& size(std::size_t w, std::size_t h) {
-        ImGui::SetWindowSize(ImVec2(w, h));
+        ImGui::SetWindowSize(ImVec2(static_cast<float>(w), static_cast<float>(h)));
         return *this;
     }
 

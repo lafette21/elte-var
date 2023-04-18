@@ -1,6 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include "types.h"
+
 #include <opencv2/core.hpp>
 
 #include <vector>
@@ -19,54 +21,50 @@ NormalizedData normalizeData(const PointPairs& pointPairs) {
     std::size_t ptsNum = pointPairs.size();
 
     // calculate means (they will be the center of coordinate systems)
-    float mean1x = 0.0, mean1y = 0.0, mean2x = 0.0, mean2y = 0.0;
+    vec2 mean1 = {}, mean2 = {};
 
     for (std::size_t i = 0; i < ptsNum; ++i) {
         auto& pp = pointPairs[i];
-        mean1x += pp.first.x;
-        mean1y += pp.first.y;
-        mean2x += pp.second.x;
-        mean2y += pp.second.y;
+        mean1.x() += pp.first.x;
+        mean1.y() += pp.first.y;
+        mean2.x() += pp.second.x;
+        mean2.y() += pp.second.y;
     }
 
-    mean1x /= ptsNum;
-    mean1y /= ptsNum;
-    mean2x /= ptsNum;
-    mean2y /= ptsNum;
+    mean1 /= static_cast<float>(ptsNum);
+    mean2 /= static_cast<float>(ptsNum);
 
-    float spread1x = 0.0, spread1y = 0.0, spread2x = 0.0, spread2y = 0.0;
+    vec2 spread1 = {}, spread2 = {};
 
     for (std::size_t i = 0; i < ptsNum; ++i) {
         auto& pp = pointPairs[i];
-        spread1x += (pp.first.x - mean1x) * (pp.first.x - mean1x);
-        spread1y += (pp.first.y - mean1y) * (pp.first.y - mean1y);
-        spread2x += (pp.second.x - mean2x) * (pp.second.x - mean2x);
-        spread2y += (pp.second.y - mean2y) * (pp.second.y - mean2y);
+        spread1.x() += (pp.first.x - mean1.x()) * (pp.first.x - mean1.x());
+        spread1.y() += (pp.first.y - mean1.y()) * (pp.first.y - mean1.y());
+        spread2.x() += (pp.second.x - mean2.x()) * (pp.second.x - mean2.x());
+        spread2.y() += (pp.second.y - mean2.y()) * (pp.second.y - mean2.y());
     }
 
-    spread1x /= ptsNum;
-    spread1y /= ptsNum;
-    spread2x /= ptsNum;
-    spread2y /= ptsNum;
+    spread1 /= static_cast<float>(ptsNum);
+    spread2 /= static_cast<float>(ptsNum);
 
     cv::Mat offs1 = cv::Mat::eye(3, 3, CV_32F);
     cv::Mat offs2 = cv::Mat::eye(3, 3, CV_32F);
     cv::Mat scale1 = cv::Mat::eye(3, 3, CV_32F);
     cv::Mat scale2 = cv::Mat::eye(3, 3, CV_32F);
 
-    offs1.at<float>(0, 2) = -mean1x;
-    offs1.at<float>(1, 2) = -mean1y;
+    offs1.at<float>(0, 2) = -mean1.x();
+    offs1.at<float>(1, 2) = -mean1.y();
 
-    offs2.at<float>(0, 2) = -mean2x;
-    offs2.at<float>(1, 2) = -mean2y;
+    offs2.at<float>(0, 2) = -mean2.x();
+    offs2.at<float>(1, 2) = -mean2.y();
 
     const float sqrt2 = static_cast<float>(std::sqrt(2));
 
-    scale1.at<float>(0, 0) = sqrt2 / std::sqrt(spread1x);
-    scale1.at<float>(1, 1) = sqrt2 / std::sqrt(spread1y);
+    scale1.at<float>(0, 0) = sqrt2 / std::sqrt(spread1.x());
+    scale1.at<float>(1, 1) = sqrt2 / std::sqrt(spread1.y());
 
-    scale2.at<float>(0, 0) = sqrt2 / std::sqrt(spread2x);
-    scale2.at<float>(1, 1) = sqrt2 / std::sqrt(spread2y);
+    scale2.at<float>(0, 0) = sqrt2 / std::sqrt(spread2.x());
+    scale2.at<float>(1, 1) = sqrt2 / std::sqrt(spread2.y());
 
     NormalizedData result;
     result.T1 = scale1 * offs1;
@@ -77,11 +75,11 @@ NormalizedData normalizeData(const PointPairs& pointPairs) {
         cv::Point2f p2;
 
         auto& pp = pointPairs[i];
-        p1.x = sqrt2 * (pp.first.x - mean1x) / std::sqrt(spread1x);
-        p1.y = sqrt2 * (pp.first.y - mean1y) / std::sqrt(spread1y);
+        p1.x = sqrt2 * (pp.first.x - mean1.x()) / std::sqrt(spread1.x());
+        p1.y = sqrt2 * (pp.first.y - mean1.y()) / std::sqrt(spread1.y());
 
-        p2.x = sqrt2 * (pp.second.x - mean2x) / std::sqrt(spread2x);
-        p2.y = sqrt2 * (pp.second.y - mean2y) / std::sqrt(spread2y);
+        p2.x = sqrt2 * (pp.second.x - mean2.x()) / std::sqrt(spread2.x());
+        p2.y = sqrt2 * (pp.second.y - mean2.y()) / std::sqrt(spread2.y());
 
         result.pointPairs.emplace_back(p1, p2);
     }

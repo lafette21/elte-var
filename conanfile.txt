@@ -8,6 +8,8 @@ opencv/4.5.5
 spdlog/1.11.0
 
 [options]
+opencv:with_ade=False
+opencv:with_ffmpeg=False
 opencv:with_tiff=False
 opencv:with_webp=False
 opencv:with_ffmpeg=False
