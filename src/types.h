@@ -19,6 +19,12 @@ struct vec2 {
 
     auto operator<=>(const vec2&) const = default;
 
+    inline vec2& operator+=(const vec2& obj) noexcept {
+        data[0] += obj.data[0];
+        data[1] += obj.data[1];
+        return *this;
+    }
+
     /**
      * @brief   Division by a scalar
      */

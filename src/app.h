@@ -105,6 +105,10 @@ public:
                     _state.curStartPos = ImGui::GetCursorStartPos();
                     _state.pos = ImGui::GetCursorScreenPos();
                     _state.imageContentSize = ImGui::GetContentRegionAvail();
+                    if (_state.imageFirstFrame) {
+                        _state.imageContentSize += vec2{ 1, 1 };
+                        _state.imageFirstFrame = false;
+                    }
                 })
                 .size(
                     static_cast<std::size_t>(_state.width / 2.1),
@@ -116,7 +120,7 @@ public:
                     _state.imageContentSize + _state.pos
                 )
                 .allow_overlap()
-                .invisible_button("Image sensor", ImGui::GetContentRegionAvail(), [this] {
+                .invisible_button("Image sensor", _state.imageContentSize, [this] {
                     const vec2 mousePos = ImGui::GetMousePos();
                     const vec2 mousePosInWindow = mousePos - _state.windowPos - _state.curStartPos;
                     const auto image = _model.image();
@@ -153,6 +157,10 @@ public:
                 _state.curStartPos = ImGui::GetCursorStartPos();
                 _state.pos = ImGui::GetCursorScreenPos();
                 _state.pitchContentSize = ImGui::GetContentRegionAvail();
+                if (_state.pitchFirstFrame) {
+                    _state.pitchContentSize += vec2{ 1, 1 };
+                    _state.pitchFirstFrame = false;
+                }
             })
             .size(
                 static_cast<std::size_t>(_state.width / 2.1),
@@ -164,7 +172,7 @@ public:
                 _state.pitchContentSize + _state.pos
             )
             .allow_overlap()
-            .invisible_button("Pitch sensor", ImGui::GetContentRegionAvail(), [this] {
+            .invisible_button("Pitch sensor", _state.pitchContentSize, [this] {
                 const vec2 mousePos = ImGui::GetMousePos();
                 const vec2 mousePosInWindow = mousePos - _state.windowPos - _state.curStartPos;
                 const auto pitch = _model.pitch();
@@ -299,11 +307,13 @@ private:
         int imagePointsCurrentIdx   = -1;
         int pitchPointsCurrentIdx   = -1;
         int width, height;
+        bool imageFirstFrame        = true;
+        bool pitchFirstFrame        = true;
         bool showImage              = false;
         bool isImagePointSelected   = false;
         bool isPitchPointSelected   = false;
-        bool setAttacker = false;
-        bool setDefender = false;
+        bool setAttacker            = false;
+        bool setDefender            = false;
     };
 
     std::chrono::nanoseconds _lastUpdate, _delta;
