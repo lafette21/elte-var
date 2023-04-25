@@ -171,8 +171,8 @@ public:
         return *this;
     }
 
-    window& size(std::size_t w, std::size_t h) {
-        ImGui::SetWindowSize(ImVec2(static_cast<float>(w), static_cast<float>(h)));
+    window& size(const vec2& size) {
+        ImGui::SetWindowSize(size);
         return *this;
     }
 
@@ -361,9 +361,9 @@ public:
         return ui::window(title, isOpen, flag /*, m_caches[name]*/);
     }
 
-    [[nodiscard]] auto dimensions() const noexcept { return _dimensions; }
-    [[nodiscard]] auto height() const noexcept { return _height; }
-    [[nodiscard]] auto width() const noexcept { return _width; }
+    [[nodiscard]] inline auto dimensions() const noexcept { return _dimensions; }
+    [[nodiscard]] inline auto height() const noexcept { return _height; }
+    [[nodiscard]] inline auto width() const noexcept { return _width; }
 
 private:
     std::string_view _glslVersion;

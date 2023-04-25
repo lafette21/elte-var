@@ -91,7 +91,7 @@ public:
             .text("Mouse pos: x={} y={}", ImGui::GetMousePos().x, ImGui::GetMousePos().y);
 
         _gui.window("Settings", nullptr, ui::window_flag::NoResize)
-            .size(300, 150)
+            .size({ 300, 150 })
             .text("Pitch size")
             .input("width", &_model.pitchSize().x())
             .input("height", &_model.pitchSize().y())
@@ -110,10 +110,10 @@ public:
                         _state.imageFirstFrame = false;
                     }
                 })
-                .size(
-                    static_cast<std::size_t>(_state.width / 2.1),
-                    static_cast<std::size_t>((_state.width / 2.1) / _model.image().cols * _model.image().rows)
-                )
+                .size({
+                    static_cast<float>(_state.width / 2.1),
+                    static_cast<float>((_state.width / 2.1) / _model.image().cols * _model.image().rows)
+                })
                 .image(
                     _state.imageTexture,
                     _state.pos,
@@ -162,10 +162,10 @@ public:
                     _state.pitchFirstFrame = false;
                 }
             })
-            .size(
-                static_cast<std::size_t>(_state.width / 2.1),
-                static_cast<std::size_t>((_state.width / 2.1) / _model.pitch().cols * _model.pitch().rows)
-            )
+            .size({
+                static_cast<float>(_state.width / 2.1),
+                static_cast<float>((_state.width / 2.1) / _model.pitch().cols * _model.pitch().rows)
+            })
             .image(
                 _state.pitchTexture,
                 _state.pos,
@@ -195,7 +195,7 @@ public:
             });
 
         _gui.window("Image points", nullptr, ui::window_flag::NoResize)
-            .size(300, 200)
+            .size({ 300, 200 })
             .listbox("listbox", [this] {
                 _state.isImagePointSelected = false;
 
@@ -225,7 +225,7 @@ public:
             });
 
         _gui.window("Pitch points", nullptr, ui::window_flag::NoResize)
-            .size(300, 200)
+            .size({ 300, 200 })
             .listbox("listbox", [this] {
                 _state.isPitchPointSelected = false;
 
@@ -261,7 +261,7 @@ public:
                 _state.attackerPos = _model.attackerPos() / (imageSize / _state.imageContentSize);
                 _state.defenderPos = _model.defenderPos() / (imageSize / _state.imageContentSize);
             })
-            .size(200, 160)
+            .size({ 200, 160 })
             .text("Attacker")
             .text(
                 "x={:.0f} y={:.0f}",
