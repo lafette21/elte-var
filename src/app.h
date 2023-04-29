@@ -48,6 +48,8 @@ public:
     void renderMainMenu() {
         _gui.main_menu().menu("File")
             .item("Load", [this] {
+                _state.loadPopupFlag = true;
+
                 _model.imagePath() = "/Users/lafette21/Downloads/video-assisted-referee/data/DSCF0137.jpeg";
                 _model.load();
 
@@ -86,6 +88,16 @@ public:
     }
 
     void renderWindows() {
+        if (_state.loadPopupFlag) {
+            _gui.popup("Load")
+                .button("Cica", [this] {
+                    spdlog::info("click");
+                    ImGui::CloseCurrentPopup();
+                    _state.loadPopupFlag = false;
+                })
+                .open();
+        }
+
         _gui.window("Debug", nullptr, ui::window_flag::None)
             .text("Logic time: {:.3f}ms", static_cast<double>(_delta.count()) / 1'000'000.0)
             .text("Mouse pos: x={} y={}", ImGui::GetMousePos().x, ImGui::GetMousePos().y);
@@ -307,6 +319,7 @@ private:
         int imagePointsCurrentIdx   = -1;
         int pitchPointsCurrentIdx   = -1;
         int width, height;
+        bool loadPopupFlag          = false;
         bool imageFirstFrame        = true;
         bool pitchFirstFrame        = true;
         bool showImage              = false;

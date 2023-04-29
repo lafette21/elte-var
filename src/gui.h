@@ -202,12 +202,12 @@ public:
 private:
 
 };
-/*
+
 class popup {
 public:
     popup(const std::string& name):
         _name(name),
-        _active(ImGui::BeginPopup(name.c_str()))
+        _active(ImGui::BeginPopupModal(name.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {}
 
     ~popup() {
@@ -220,11 +220,18 @@ public:
         ImGui::OpenPopup(_name.c_str());
     }
 
+    popup& button(const std::string& name, std::invocable auto&& callback) {
+        if (ImGui::Button(name.c_str())) {
+            std::invoke(callback);
+        }
+        return *this;
+    }
+
 private:
     std::string _name;
     bool _active;
 };
-*/
+
 class menu {
 public:
     menu(const std::string& name):
@@ -339,11 +346,11 @@ public:
     ui::main_menu main_menu() {
         return ui::main_menu();
     }
-/*
+
     ui::popup popup(const std::string& name) {
         return ui::popup(name);
     }
-*/
+
     /**
      * @brief   Create a window with cache
      *
