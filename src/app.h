@@ -85,6 +85,8 @@ public:
                 _model.reset();
                 renderImages();
             });
+
+        _gui.main_menu().button("Debug", [this] { _state.debugWindowIsOpen = not _state.debugWindowIsOpen; });
     }
 
     void renderWindows() {
@@ -98,11 +100,14 @@ public:
                 .open();
         }
 
-        _gui.window("Debug", nullptr, ui::window_flag::None)
-            .text("Logic time: {:.3f}ms", static_cast<double>(_delta.count()) / 1'000'000.0)
-            .text("Mouse pos: x={} y={}", ImGui::GetMousePos().x, ImGui::GetMousePos().y);
+        if (_state.debugWindowIsOpen) {
+            _gui.window("Debug", ui::window_config{ ui::window_flag::None }, &_state.debugWindowIsOpen)
+                .text("Logic time: {:.3f}ms", static_cast<double>(_delta.count()) / 1'000'000.0)
+                .text("Mouse pos: x={} y={}", ImGui::GetMousePos().x, ImGui::GetMousePos().y)
+                .text("IsOpen: {}", _state.debugWindowIsOpen);
+        }
 
-        _gui.window("Settings", nullptr, ui::window_flag::NoResize)
+        _gui.window("Settings", ui::window_config{ ui::window_flag::NoResize })
             .size({ 300, 150 })
             .text("Pitch size")
             .input("width", &_model.pitchSize().x())
@@ -111,7 +116,7 @@ public:
             .input("path", &_model.imagePath());
 
         if (_state.showImage) {
-            _gui.window("Image", nullptr, ui::window_flag::NoResize)
+            _gui.window("Image", ui::window_config{ ui::window_flag::NoResize })
                 .callback([this] {
                     _state.windowPos = ImGui::GetWindowPos();
                     _state.curStartPos = ImGui::GetCursorStartPos();
@@ -163,7 +168,7 @@ public:
                 });
         }
 
-        _gui.window("Pitch", nullptr, ui::window_flag::NoResize)
+        _gui.window("Pitch", ui::window_config{ ui::window_flag::NoResize })
             .callback([this] {
                 _state.windowPos = ImGui::GetWindowPos();
                 _state.curStartPos = ImGui::GetCursorStartPos();
@@ -206,7 +211,7 @@ public:
                 renderImages();
             });
 
-        _gui.window("Image points", nullptr, ui::window_flag::NoResize)
+        _gui.window("Image points", ui::window_config{ ui::window_flag::NoResize })
             .size({ 300, 200 })
             .listbox("listbox", [this] {
                 _state.isImagePointSelected = false;
@@ -236,7 +241,7 @@ public:
                 }
             });
 
-        _gui.window("Pitch points", nullptr, ui::window_flag::NoResize)
+        _gui.window("Pitch points", ui::window_config{ ui::window_flag::NoResize })
             .size({ 300, 200 })
             .listbox("listbox", [this] {
                 _state.isPitchPointSelected = false;
@@ -266,7 +271,7 @@ public:
                 }
             });
 
-        _gui.window("Players", nullptr, ui::window_flag::NoResize)
+        _gui.window("Players", ui::window_config{ ui::window_flag::NoResize })
             .callback([this] {
                 const auto image = _model.image();
                 const vec2 imageSize = { static_cast<float>(image.cols), static_cast<float>(image.rows) };
@@ -319,6 +324,7 @@ private:
         int imagePointsCurrentIdx   = -1;
         int pitchPointsCurrentIdx   = -1;
         int width, height;
+        bool debugWindowIsOpen      = true;
         bool loadPopupFlag          = false;
         bool imageFirstFrame        = true;
         bool pitchFirstFrame        = true;

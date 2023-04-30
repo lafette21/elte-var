@@ -57,68 +57,65 @@ enum class window_flag {
     NoInputs                    = ImGuiWindowFlags_NoInputs,
 };
 
-/**
- * @brief   Fundamental UI element holding other UI elements
- */
-class window {
+inline int operator|(window_flag lhs, window_flag rhs) {
+    return static_cast<int>(lhs) | static_cast<int>(rhs);
+}
+
+template <typename Derived>
+class widget {
 public:
-    window(const std::string& title, bool* isOpen = nullptr, window_flag flag = window_flag::None) {
-        ImGui::Begin(title.c_str(), isOpen, static_cast<int>(flag)); // TODO: More flag handling
-    }
+    widget()                         = default;
+    ~widget()                        = default;
 
-    ~window() {
-        ImGui::End();
-    }
+    widget(const widget&)            = delete;
+    widget(widget&&)                 = delete;
+    widget& operator=(const widget&) = delete;
+    widget& operator=(widget&&)      = delete;
 
-    window(const window&)            = delete;
-    window(window&&)                 = delete;
-    window& operator=(const window&) = delete;
-    window& operator=(window&&)      = delete;
-
-    window& callback(std::invocable auto&& callback) {
+    Derived& callback(std::invocable auto&& callback) {
         std::invoke(callback);
-        return *this;
+        return *static_cast<Derived*>(this);
     }
 
     /**
      * @brief   Create a button which calls the `callback` upon clicking
      */
-    window& button(const std::string& name, std::invocable auto&& callback) {
+    Derived& button(const std::string& name, std::invocable auto&& callback) {
         if (ImGui::Button(name.c_str())) {
             std::invoke(callback);
         }
-        return *this;
+        return *static_cast<Derived*>(this);
     }
 
-    window& invisible_button(const std::string& name, const vec2& size, std::invocable auto&& callback) {
+    Derived& invisible_button(const std::string& name, const vec2& size, std::invocable auto&& callback) {
         if (ImGui::InvisibleButton(name.c_str(), size)) {
             std::invoke(callback);
         }
-        return *this;
+        return *static_cast<Derived*>(this);
     }
 
     /**
      * @brief   Display text as is
      */
-    window& text(const std::string& msg) {
+    Derived& text(const std::string& msg) {
         ImGui::Text("%s", msg.c_str());
-        return *this;
+        return *static_cast<Derived*>(this);
     }
 
     /**
      * @brief   Display as formatted text
      */
     template <typename ...Args>
-    window& text(const std::string& fmt, Args&&... args) {
+    Derived& text(const std::string& fmt, Args&&... args) {
         ImGui::Text("%s", fmt::vformat(fmt, fmt::make_format_args(std::forward<Args>(args)...)).c_str());
-        return *this;
+        return *static_cast<Derived*>(this);
     }
 
     /**
      * @brief   Create an input box
      */
     template <typename T>
-    window& input(const std::string& label, T* value) {
+    Derived& input(const std::string& label, T* value) {
         if constexpr (std::is_same_v<T, int>) {
             ImGui::InputInt(label.c_str(), value);
         } else if constexpr (std::is_same_v<T, float>) {
@@ -147,63 +144,97 @@ public:
                 "Only the following types are supported for input: int, float, double, std::string"
             );
         }
-        return *this;
+        return *static_cast<Derived*>(this);
     }
 
     /**
      * @brief   Create a checkbox
      */
-    window& checkbox(const std::string& label, bool* value) {
+    Derived& checkbox(const std::string& label, bool* value) {
         ImGui::Checkbox(label.c_str(), value);
-        return *this;
+        return *static_cast<Derived*>(this);
     }
 
-    window& image(GLuint texture, const vec2& upperLeft, const vec2& bottomRight) {
+    Derived& image(GLuint texture, const vec2& upperLeft, const vec2& bottomRight) {
         ImGui::GetWindowDrawList()->AddImage(reinterpret_cast<void*>(texture), upperLeft, bottomRight);
-        return *this;
+        return *static_cast<Derived*>(this);
     }
 
-    window& listbox(const std::string& label, std::invocable auto&& callback) {
+    Derived& listbox(const std::string& label, std::invocable auto&& callback) {
         if (ImGui::BeginListBox(label.c_str())) {
             std::invoke(callback);
             ImGui::EndListBox();
         }
-        return *this;
+        return *static_cast<Derived*>(this);
     }
 
-    window& size(const vec2& size) {
+    Derived& size(const vec2& size) {
         ImGui::SetWindowSize(size);
-        return *this;
+        return *static_cast<Derived*>(this);
     }
 
-    window& allow_overlap() {
+    Derived& allow_overlap() {
         ImGui::SetItemAllowOverlap();
-        return *this;
+        return *static_cast<Derived*>(this);
     }
 
-    window& same_line() {
+    Derived& same_line() {
         ImGui::SameLine();
-        return *this;
+        return *static_cast<Derived*>(this);
     }
 
-    window& dummy(const vec2& size) {
+    Derived& dummy(const vec2& size) {
         ImGui::Dummy(size);
-        return *this;
+        return *static_cast<Derived*>(this);
     }
 
     /**
      * @brief   TODO
      */
-    window& separator() {
+    Derived& separator() {
         ImGui::Separator();
-        return *this;
+        return *static_cast<Derived*>(this);
     }
 
 private:
-
 };
 
-class popup {
+class window_config {
+public:
+    window_config() = default;
+
+    template <typename... Args>
+        requires (std::is_same_v<Args, window_flag> && ...)
+    window_config(Args&&... args) {
+        _flag = static_cast<int>(((std::forward<Args>(args)) | ...));
+    }
+
+    [[nodiscard]] int flag() const noexcept { return _flag; }
+
+private:
+    int _flag       = static_cast<int>(window_flag::None);
+};
+
+/**
+ * @brief   Fundamental UI element holding other UI elements
+ */
+class window : public widget<window> {
+public:
+    window(const std::string& title, const window_config& config, bool* isOpen = nullptr) {
+        ImGui::Begin(title.c_str(), isOpen, config.flag());
+    }
+
+    ~window() {
+        ImGui::End();
+    }
+
+    window(const window&)            = delete;
+    window(window&&)                 = delete;
+    window& operator=(const window&) = delete;
+    window& operator=(window&&)      = delete;
+};
+
+class popup : public widget<popup> {
 public:
     popup(const std::string& name):
         _name(name),
@@ -220,19 +251,12 @@ public:
         ImGui::OpenPopup(_name.c_str());
     }
 
-    popup& button(const std::string& name, std::invocable auto&& callback) {
-        if (ImGui::Button(name.c_str())) {
-            std::invoke(callback);
-        }
-        return *this;
-    }
-
 private:
     std::string _name;
     bool _active;
 };
 
-class menu {
+class menu : public widget<menu> {
 public:
     menu(const std::string& name):
         _active(ImGui::BeginMenu(name.c_str()))
@@ -250,42 +274,6 @@ public:
     menu& operator=(menu&&) = delete;
 
     /**
-     * @brief   Create an input box
-     */
-    template <typename T>
-    menu& input(const std::string& label, T* value) {
-        if constexpr (std::is_same_v<T, int>) {
-            ImGui::InputInt(label.c_str(), value);
-        } else if constexpr (std::is_same_v<T, float>) {
-            ImGui::InputFloat(label.c_str(), value);
-        } else if constexpr (std::is_same_v<T, double>) {
-            ImGui::InputDouble(label.c_str(), value);
-        } else if constexpr (std::is_same_v<T, std::string>) {
-            ImGui::InputText(
-                label.c_str(),
-                value->data(),
-                value->capacity() + 1,
-                ImGuiInputTextFlags_CallbackResize,
-                [](ImGuiInputTextCallbackData* data) -> int {
-                    if (data->EventFlag == ImGuiInputTextFlags_CallbackResize) {
-                        std::string* str = static_cast<std::string*>(data->UserData);
-                        str->resize(static_cast<std::size_t>(data->BufTextLen));
-                        data->Buf = str->data();
-                    }
-                    return 0;
-                },
-            value
-            );
-        } else {
-            static_assert(
-                std::is_same_v<T, void> && !std::is_same_v<T, void>,
-                "Only the following types are supported for input: int, float, double, std::string"
-            );
-        }
-        return *this;
-    }
-
-    /**
      * @brief   Create a menu item with a callback
      */
     menu& item(const std::string& name, std::invocable auto&& callback = [] {}, bool* selected = nullptr, const std::string& shortcut = "") {
@@ -301,7 +289,7 @@ private:
     bool _active;
 };
 
-class main_menu {
+class main_menu : public widget<main_menu> {
 public:
     main_menu():
         _active(ImGui::BeginMainMenuBar())
@@ -361,11 +349,11 @@ public:
      * Data should be converted to the appropriate type only when it is needed
      * (hence the caching).
      */
-    ui::window window(const std::string& title, bool* isOpen = nullptr, ui::window_flag flag = ui::window_flag::None) {
+    ui::window window(const std::string& title, const ui::window_config& config, bool* isOpen = nullptr) {
         /*if (not m_caches.contains(name)) {
             m_caches[name] = ui_state{};
         }*/
-        return ui::window(title, isOpen, flag /*, m_caches[name]*/);
+        return ui::window(title, config, isOpen /*, m_caches[name]*/);
     }
 
     [[nodiscard]] inline auto dimensions() const noexcept { return _dimensions; }
@@ -377,8 +365,6 @@ private:
     GLFWwindow* _window = nullptr;
     vec2 _dimensions;
     int _width, _height;
-
-    // std::map<std::string, ui_state> _caches;       // TODO(perf,data-structure): flatmap
 
     static void clear_color(const vec4& color);
     static std::string_view GLSLVersion();
