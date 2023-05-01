@@ -1,6 +1,7 @@
 #ifndef APP_H
 #define APP_H
 
+#include "logging.h"
 #include "model.h"
 #include "gui.h"
 
@@ -66,7 +67,7 @@ public:
                     cv::waitKey(0);
                     cv::destroyAllWindows();
                 } catch (const std::exception& ex) {
-                    spdlog::error("{}", ex.what());
+                    logging::error("{}", ex.what());
                 }
             })
             .item("Reset", [this] {

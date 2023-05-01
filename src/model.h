@@ -1,13 +1,13 @@
 #ifndef MODEL_H
 #define MODEL_H
 
+#include "logging.h"
 #include "types.h"
 #include "utils.h"
 
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
-#include <spdlog/spdlog.h>
 
 #include <map>
 
@@ -45,7 +45,7 @@ public:
             cv::cvtColor(image, image, cv::COLOR_RGBA2BGR);
             cv::imwrite(path, image);
         } catch (const std::exception& ex) {
-            spdlog::error("{}", ex.what());
+            logging::error("{}", ex.what());
         }
     }
 

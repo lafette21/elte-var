@@ -1,4 +1,5 @@
 #include "app.h"
+#include "logging.h"
 
 #include <fmt/format.h>
 
@@ -10,7 +11,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] const char *argv[])
         app.start();
 
     } catch (const std::exception& ex) {
-        spdlog::error("{}", ex.what());
+        logging::error("{}", ex.what());
     }
 
     return 0;

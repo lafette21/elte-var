@@ -3,6 +3,7 @@
 
 #include "bindings/imgui_impl_glfw.h"
 #include "bindings/imgui_impl_opengl2.h"
+#include "logging.h"
 #include "types.h"
 
 #define IM_VEC2_CLASS_EXTRA                                                     \
@@ -20,7 +21,6 @@
 #endif
 #include <GLFW/glfw3.h>
 #include <imgui.h>
-#include <spdlog/spdlog.h>
 
 #include <functional>
 #include <string>

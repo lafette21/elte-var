@@ -6,7 +6,7 @@ gui::gui(const std::string& title, vec2 size):
     _glslVersion(GLSLVersion()),
     _dimensions(size)
 {
-    glfwSetErrorCallback([](int err, const char* msg) { spdlog::error("{} {}", err, msg); });
+    glfwSetErrorCallback([](int err, const char* msg) { logging::error("{} {}", err, msg); });
 
     if (not glfwInit()) {
         throw std::runtime_error("Failed to initialize GUI!");
@@ -19,7 +19,7 @@ gui::gui(const std::string& title, vec2 size):
 
     glfwMakeContextCurrent(_window);
 
-    spdlog::info("OpenGL Version: {}", std::string(reinterpret_cast<const char*>(glGetString(GL_VERSION))));
+    logging::info("OpenGL Version: {}", std::string(reinterpret_cast<const char*>(glGetString(GL_VERSION))));
 
     glfwSwapInterval(1); // Enable vsync
 
