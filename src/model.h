@@ -40,7 +40,7 @@ public:
 
     void save(const std::string& path) {
         try {
-            const auto [image, _] = generate();
+            auto [image, _] = generate();
 
             cv::cvtColor(image, image, cv::COLOR_RGBA2BGR);
             cv::imwrite(path, image);

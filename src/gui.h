@@ -87,6 +87,13 @@ public:
         return *static_cast<Derived*>(this);
     }
 
+    Derived& button(const std::string& name, const vec2& size = { 0, 0 }, std::invocable auto&& callback = [] {}) {
+        if (ImGui::Button(name.c_str(), size)) {
+            std::invoke(callback);
+        }
+        return *static_cast<Derived*>(this);
+    }
+
     Derived& invisible_button(const std::string& name, const vec2& size, std::invocable auto&& callback) {
         if (ImGui::InvisibleButton(name.c_str(), size)) {
             std::invoke(callback);
@@ -185,6 +192,11 @@ public:
 
     Derived& dummy(const vec2& size) {
         ImGui::Dummy(size);
+        return *static_cast<Derived*>(this);
+    }
+
+    Derived& focus() {
+        ImGui::SetItemDefaultFocus();
         return *static_cast<Derived*>(this);
     }
 

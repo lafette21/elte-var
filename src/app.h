@@ -51,22 +51,8 @@ public:
                 _state.loadPopupFlag = true;
 
                 _model.imagePath() = "/Users/lafette21/Downloads/video-assisted-referee/data/DSCF0137.jpeg";
-                _model.load();
-
-                glGenTextures(1, &_state.imageTexture);
-                glBindTexture(GL_TEXTURE_2D, _state.imageTexture);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-                // Set texture clamping method
-                const auto& image = _model.image();
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.cols, image.rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.ptr());
-
-                _state.showImage = true;
             })
-            .item("Save", [this] { _model.save(""); });
+            .item("Save", [this] { _state.savePopupFlag = true; });
 
         _gui.main_menu().menu("Edit")
             .item("Generate", [this] {
@@ -86,25 +72,64 @@ public:
                 renderImages();
             });
 
-        _gui.main_menu().button("Debug", [this] { _state.debugWindowIsOpen = not _state.debugWindowIsOpen; });
+        _gui.main_menu().button("Debug", [this] { _state.debugWindowFlag = not _state.debugWindowFlag; });
     }
 
     void renderWindows() {
         if (_state.loadPopupFlag) {
             _gui.popup("Load")
-                .button("Cica", [this] {
-                    spdlog::info("click");
-                    ImGui::CloseCurrentPopup();
+                .input("path", &_model.imagePath())
+                .separator()
+                .button("Ok", vec2{ 120, 0 }, [this] {
+                    _model.load();
+
+                    glGenTextures(1, &_state.imageTexture);
+                    glBindTexture(GL_TEXTURE_2D, _state.imageTexture);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+                    // Set texture clamping method
+                    const auto& image = _model.image();
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.cols, image.rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.ptr());
+
+                    _state.showImage = true;
                     _state.loadPopupFlag = false;
+                    ImGui::CloseCurrentPopup();
+                })
+                .focus()
+                .same_line()
+                .button("Cancel", vec2{ 120, 0 }, [this] {
+                    _state.loadPopupFlag = false;
+                    ImGui::CloseCurrentPopup();
                 })
                 .open();
         }
 
-        if (_state.debugWindowIsOpen) {
-            _gui.window("Debug", ui::window_config{ ui::window_flag::None }, &_state.debugWindowIsOpen)
+        if (_state.savePopupFlag) {
+            _gui.popup("Save")
+                .input("path", &_state.savePath)
+                .separator()
+                .button("Ok", vec2{ 120, 0 }, [this] {
+                    _model.save(_state.savePath);
+                    _state.savePopupFlag = false;
+                    ImGui::CloseCurrentPopup();
+                })
+                .focus()
+                .same_line()
+                .button("Cancel", vec2{ 120, 0 }, [this] {
+                    _state.savePopupFlag = false;
+                    ImGui::CloseCurrentPopup();
+                })
+                .open();
+        }
+
+        if (_state.debugWindowFlag) {
+            _gui.window("Debug", ui::window_config{ ui::window_flag::None }, &_state.debugWindowFlag)
                 .text("Logic time: {:.3f}ms", static_cast<double>(_delta.count()) / 1'000'000.0)
                 .text("Mouse pos: x={} y={}", ImGui::GetMousePos().x, ImGui::GetMousePos().y)
-                .text("IsOpen: {}", _state.debugWindowIsOpen);
+                .text("debugWindowFlag: {}", _state.debugWindowFlag);
         }
 
         _gui.window("Settings", ui::window_config{ ui::window_flag::NoResize })
@@ -315,6 +340,7 @@ public:
 
 private:
     struct state {
+        std::string savePath;
         MinPriorQueue availableImagePointIdx    = {};
         MinPriorQueue availablePitchPointIdx    = {};
         GLuint imageTexture, pitchTexture       = {};
@@ -324,8 +350,9 @@ private:
         int imagePointsCurrentIdx   = -1;
         int pitchPointsCurrentIdx   = -1;
         int width, height;
-        bool debugWindowIsOpen      = true;
+        bool debugWindowFlag        = true;
         bool loadPopupFlag          = false;
+        bool savePopupFlag          = false;
         bool imageFirstFrame        = true;
         bool pitchFirstFrame        = true;
         bool showImage              = false;
