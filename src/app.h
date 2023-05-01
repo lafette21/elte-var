@@ -50,7 +50,9 @@ public:
             .item("Load", [this] {
                 _state.loadPopupFlag = true;
 
-                _model.imagePath() = "/Users/lafette21/Downloads/video-assisted-referee/data/DSCF0137.jpeg";
+                if (_state.debugWindowFlag) {
+                    _model.imagePath() = "/Users/lafette21/Downloads/video-assisted-referee/data/DSCF0137.jpeg";
+                }
             })
             .item("Save", [this] { _state.savePopupFlag = true; });
 

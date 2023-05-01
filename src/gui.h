@@ -30,6 +30,9 @@ namespace var {
 
 namespace ui {
 
+/**
+ * @brief   TODO
+ */
 enum class window_flag {
     None                        = ImGuiWindowFlags_None,
     NoTitleBar                  = ImGuiWindowFlags_NoTitleBar,
@@ -61,6 +64,9 @@ inline int operator|(window_flag lhs, window_flag rhs) {
     return static_cast<int>(lhs) | static_cast<int>(rhs);
 }
 
+/**
+ * @brief   TODO
+ */
 template <typename Derived>
 class widget {
 public:
@@ -72,6 +78,9 @@ public:
     widget& operator=(const widget&) = delete;
     widget& operator=(widget&&)      = delete;
 
+    /**
+     * @brief   Calls the `callback` between widgets
+     */
     Derived& callback(std::invocable auto&& callback) {
         std::invoke(callback);
         return *static_cast<Derived*>(this);
@@ -87,6 +96,9 @@ public:
         return *static_cast<Derived*>(this);
     }
 
+    /**
+     * @brief   Create a button with fixed size which calls the `callback` upon clicking
+     */
     Derived& button(const std::string& name, const vec2& size = { 0, 0 }, std::invocable auto&& callback = [] {}) {
         if (ImGui::Button(name.c_str(), size)) {
             std::invoke(callback);
@@ -94,6 +106,9 @@ public:
         return *static_cast<Derived*>(this);
     }
 
+    /**
+     * @brief   Create an invisible button
+     */
     Derived& invisible_button(const std::string& name, const vec2& size, std::invocable auto&& callback) {
         if (ImGui::InvisibleButton(name.c_str(), size)) {
             std::invoke(callback);
@@ -102,7 +117,7 @@ public:
     }
 
     /**
-     * @brief   Display text as is
+     * @brief   Create a label
      */
     Derived& text(const std::string& msg) {
         ImGui::Text("%s", msg.c_str());
@@ -110,7 +125,7 @@ public:
     }
 
     /**
-     * @brief   Display as formatted text
+     * @brief   Create a label with formatted text
      */
     template <typename ...Args>
     Derived& text(const std::string& fmt, Args&&... args) {
@@ -162,11 +177,9 @@ public:
         return *static_cast<Derived*>(this);
     }
 
-    Derived& image(GLuint texture, const vec2& upperLeft, const vec2& bottomRight) {
-        ImGui::GetWindowDrawList()->AddImage(reinterpret_cast<void*>(texture), upperLeft, bottomRight);
-        return *static_cast<Derived*>(this);
-    }
-
+    /**
+     * @brief   Create a listbox
+     */
     Derived& listbox(const std::string& label, std::invocable auto&& callback) {
         if (ImGui::BeginListBox(label.c_str())) {
             std::invoke(callback);
@@ -175,33 +188,40 @@ public:
         return *static_cast<Derived*>(this);
     }
 
-    Derived& size(const vec2& size) {
-        ImGui::SetWindowSize(size);
-        return *static_cast<Derived*>(this);
-    }
-
+    /**
+     * @brief   Allow overlap for the current widget
+     */
     Derived& allow_overlap() {
         ImGui::SetItemAllowOverlap();
         return *static_cast<Derived*>(this);
     }
 
+    /**
+     * @brief   Set the next widget to be on the same line as the one before
+     */
     Derived& same_line() {
         ImGui::SameLine();
         return *static_cast<Derived*>(this);
     }
 
+    /**
+     * @brief   Create a dummy object (placeholder)
+     */
     Derived& dummy(const vec2& size) {
         ImGui::Dummy(size);
         return *static_cast<Derived*>(this);
     }
 
+    /**
+     * @brief   Set default focus for the current widget
+     */
     Derived& focus() {
         ImGui::SetItemDefaultFocus();
         return *static_cast<Derived*>(this);
     }
 
     /**
-     * @brief   TODO
+     * @brief   Create a horizontal separator
      */
     Derived& separator() {
         ImGui::Separator();
@@ -211,6 +231,9 @@ public:
 private:
 };
 
+/**
+ * @brief   TODO
+ */
 class window_config {
 public:
     window_config() = default;
@@ -224,11 +247,12 @@ public:
     [[nodiscard]] int flag() const noexcept { return _flag; }
 
 private:
-    int _flag       = static_cast<int>(window_flag::None);
+    int _flag = static_cast<int>(window_flag::None);
 };
 
+
 /**
- * @brief   Fundamental UI element holding other UI elements
+ * @brief   TODO
  */
 class window : public widget<window> {
 public:
@@ -244,8 +268,27 @@ public:
     window(window&&)                 = delete;
     window& operator=(const window&) = delete;
     window& operator=(window&&)      = delete;
+
+    /**
+     * @brief   Create an image on the window
+     */
+    window& image(GLuint texture, const vec2& upperLeft, const vec2& bottomRight) {
+        ImGui::GetWindowDrawList()->AddImage(reinterpret_cast<void*>(texture), upperLeft, bottomRight);
+        return *this;
+    }
+
+    /**
+     * @brief   Set the window size
+     */
+    window& size(const vec2& size) {
+        ImGui::SetWindowSize(size);
+        return *this;
+    }
 };
 
+/**
+ * @brief   TODO
+ */
 class popup : public widget<popup> {
 public:
     popup(const std::string& name):
@@ -259,6 +302,9 @@ public:
         }
     }
 
+    /**
+     * @brief   TODO
+     */
     void open() {
         ImGui::OpenPopup(_name.c_str());
     }
@@ -268,6 +314,9 @@ private:
     bool _active;
 };
 
+/**
+ * @brief   TODO
+ */
 class menu : public widget<menu> {
 public:
     menu(const std::string& name):
@@ -301,6 +350,9 @@ private:
     bool _active;
 };
 
+/**
+ * @brief   TODO
+ */
 class main_menu : public widget<main_menu> {
 public:
     main_menu():
@@ -318,6 +370,9 @@ public:
     main_menu& operator=(const main_menu&) = delete;
     main_menu& operator=(main_menu&&) = delete;
 
+    /**
+     * @brief   TODO
+     */
     ui::menu menu(const std::string& name) {
         return ui::menu(name);
     }
@@ -343,29 +398,25 @@ public:
 
     void run(std::invocable auto&& callback);
 
+    /**
+     * @brief   TODO
+     */
     ui::main_menu main_menu() {
         return ui::main_menu();
     }
 
+    /**
+     * @brief   TODO
+     */
     ui::popup popup(const std::string& name) {
         return ui::popup(name);
     }
 
     /**
-     * @brief   Create a window with cache
-     *
-     * Converting data to the proper format should be abstracted away from the client code; it
-     * must be done automatically with the provided interface (see more details at the member
-     * functions of the `ui::window`).
-     *ui_item
-     * Data should be converted to the appropriate type only when it is needed
-     * (hence the caching).
+     * @brief   TODO
      */
     ui::window window(const std::string& title, const ui::window_config& config, bool* isOpen = nullptr) {
-        /*if (not m_caches.contains(name)) {
-            m_caches[name] = ui_state{};
-        }*/
-        return ui::window(title, config, isOpen /*, m_caches[name]*/);
+        return ui::window(title, config, isOpen);
     }
 
     [[nodiscard]] inline auto dimensions() const noexcept { return _dimensions; }
@@ -403,6 +454,9 @@ void gui::run(std::invocable auto&& callback) {
     }
 }
 
+/**
+ * @brief   TODO
+ */
 inline void gui::clear_color(const vec4& color) {
     glClearColor(
         color.r() * color.a(),
