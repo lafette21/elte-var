@@ -3,8 +3,8 @@
 
 #include "logging.h"
 #include "types.h"
-#include "utils.h"
 
+#include <opencv2/calib3d.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
@@ -50,7 +50,6 @@ public:
     }
 
     std::pair<cv::Mat, cv::Mat> generate() {
-        PointPairs pointPairs;
         auto image = _image.clone();
         auto pitch = _pitch.clone();
 
@@ -70,14 +69,17 @@ public:
             throw std::runtime_error("You should select the attacker and defender players coordinate!");
         }
 
+        std::vector<cv::Point2f> srcPoints, dstPoints;
+
         for (auto itIm = _imagePoints.cbegin(), endIm = _imagePoints.cend(),
             itPi = _pitchPoints.cbegin(), endPi = _pitchPoints.cend();
             itIm != endIm && itPi != endPi; ++itIm, ++itPi
         ) {
-            pointPairs.emplace_back(itIm->second, itPi->second);
+            srcPoints.emplace_back(itIm->second);
+            dstPoints.emplace_back(itPi->second);
         }
 
-        cv::Mat H = calcHomography(pointPairs);
+        cv::Mat H = cv::findHomography(srcPoints, dstPoints);
 
         std::vector<cv::Point2f> imagePlayerPoints = { _attackerPos, _defenderPos };
         std::vector<cv::Point2f> pitchPlayerPoints;

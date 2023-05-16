@@ -21,22 +21,17 @@ gui::gui(const std::string& title, vec2 size):
 
     logging::info("OpenGL Version: {}", std::string(reinterpret_cast<const char*>(glGetString(GL_VERSION))));
 
-    glfwSwapInterval(1); // Enable vsync
+    // Enable vsync
+    glfwSwapInterval(1);
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-
-    // ImGuiIO& io = ImGui::GetIO();
-    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-
-    // io.Fonts->AddFontFromFileTTF("res/ProggyClean.ttf", 20);
 
     ImGui::StyleColorsDark();
 
     ImGui_ImplGlfw_InitForOpenGL(_window, true);
 
-    ImGui_ImplOpenGL2_Init(); // _glslVersion.data());
+    ImGui_ImplOpenGL2_Init();
 }
 
 gui::gui(gui&& other) noexcept {
