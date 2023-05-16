@@ -315,7 +315,11 @@ public:
             )
             .button("Set##Attacker", [this] { _state.setAttacker = true; })
             .same_line()
-            .button("Reset##Attacker", [this] { _model.attackerPos() = { -1, -1 }; })
+            .button("Reset##Attacker", [this] {
+                _model.attackerPos() = { -1, -1 };
+                _model.draw();
+                renderImages();
+            })
             .dummy({0, 10})
             .text("Defender")
             .text(
@@ -325,7 +329,11 @@ public:
             )
             .button("Set##Defender", [this] { _state.setDefender = true; })
             .same_line()
-            .button("Reset##Defender", [this] { _model.defenderPos() = { -1, -1 }; });
+            .button("Reset##Defender", [this] {
+                _model.defenderPos() = { -1, -1 };
+                _model.draw();
+                renderImages();
+            });
     }
 
     void renderImages() {
