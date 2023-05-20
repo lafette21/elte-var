@@ -8,6 +8,9 @@
 
 namespace var {
 
+/**
+ * @brief   Internal vec2 type
+ */
 struct vec2 {
     constexpr vec2() = default;
     constexpr vec2(float x, float y):
@@ -116,6 +119,9 @@ inline vec2 operator/(const vec2& lhs, float rhs) noexcept {
     };
 }
 
+/**
+ * @brief   Internal vec4 type
+ */
 struct vec4 {
     float x() const { return data[0]; }
     float y() const { return data[1]; }

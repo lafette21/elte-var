@@ -6,8 +6,8 @@ add_library(imgui_backend
 )
 
 add_executable(${EXEC_NAME}
-    main.cc
     gui.cc
+    main.cc
 )
 
 target_include_directories(${EXEC_NAME} PRIVATE
