@@ -48,13 +48,7 @@ public:
 
     void renderMainMenu() {
         _gui.main_menu().menu("File")
-            .item("Load", [this] {
-                _state.loadPopupFlag = true;
-
-                if (_state.debugWindowFlag) {
-                    _model.imagePath() = "/Users/lafette21/Downloads/video-assisted-referee/data/DSCF0137.jpeg";
-                }
-            })
+            .item("Load", [this] { _state.loadPopupFlag = true; })
             .item("Save", [this] { _state.savePopupFlag = true; });
 
         _gui.main_menu().menu("Edit")
@@ -134,14 +128,6 @@ public:
                 .text("Mouse pos: x={} y={}", ImGui::GetMousePos().x, ImGui::GetMousePos().y)
                 .text("debugWindowFlag: {}", _state.debugWindowFlag);
         }
-
-        _gui.window("Settings", ui::window_config{ ui::window_flag::NoResize })
-            .size({ 300, 150 })
-            .text("Pitch size")
-            .input("width", &_model.pitchSize().x())
-            .input("height", &_model.pitchSize().y())
-            .text("Image")
-            .input("path", &_model.imagePath());
 
         if (_state.showImage) {
             _gui.window("Image", ui::window_config{ ui::window_flag::NoResize })
@@ -361,7 +347,7 @@ private:
         int imagePointsCurrentIdx   = -1;
         int pitchPointsCurrentIdx   = -1;
         int width, height;
-        bool debugWindowFlag        = true;
+        bool debugWindowFlag        = false;
         bool loadPopupFlag          = false;
         bool savePopupFlag          = false;
         bool imageFirstFrame        = true;

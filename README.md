@@ -100,10 +100,82 @@ Here a 3D vector transformation is shown. In case of a 2D vector transformation,
 
 ## Graphical User Interface
 
+### API
+
 [Dear ImGui](https://github.com/ocornut/imgui) is a bloat-free graphical user interface library for C++.
 It is designed to enable fast iterations and to empower programmers to create content creation tools and
 visualization / debug tools. Dear ImGui is one possible implementation of an idea generally described
 as the IMGUI (Immediate Mode GUI) paradigm.
+
+### Menu
+
+#### Overview
+
+The menu bar is positioned at the top of the window. It provides users with access to various commands
+and options that are organized into different menus.
+
+The menu bar contains the following items:
+- File
+- Edit
+- Debug
+
+#### File Menu
+
+The File menu provides options related to file operations.
+
+The following items are available in the File menu:
+- Load - This options enables users to load images as scenarios to check with the VAR application.
+  This item triggers a dialog window for entering the path of the desired image to load.
+- Save - This option allows users to save the evaluated scenarios as images to their machines.
+  This item triggers a dialog window for entering the path of the desired location of the image to save to.
+
+#### Edit Menu
+
+The Edit menu provides options for manipulating the data loaded into the application.
+
+The following items are available in the Edit menu:
+- Generate - This option triggers specific actions within the application to evaluate the loaded scenarios.
+  More on this in the [Business logic](#business-logic) section.
+- Reset - This option allows users to reset their state of the scenarios.
+
+#### Debug Menu
+
+The Debug menu allows users to debug and troubleshoot within the development process. When triggering
+this item a Debug window opens and shows different informations about the application. More on this
+in the [Windows](#windows) section.
+
+### Windows
+
+ImGui provides different widgets and so called ui_windows to show within the main window of the application.
+
+#### Image / Pitch
+
+These windows have basic image viewer purposes. They are not resizeable for now because of some API limitations.
+The windows are constructed in a way that clicking on the image triggers an event in which the mouse position
+is saved for different purposes.
+
+#### Image points / Pitch points
+
+These windows are used to list the selected reference points on both images for the application to generate
+the evaluation of the scenarios. This listing is done in listboxes. Selecting an item in the list allows
+the user overwriting the focused item.
+
+There are two buttons on the windows:
+- Remove focus - Removes the focus from the current item in the list.
+- Remove selected - Removes the selected/focused item from the list.
+
+#### Players
+
+This window shows the attacker and defender players position.
+
+There are two types of buttons on the window:
+- Set - Triggering this button enables the user to select a point on the Image window. This point will not be
+  listed within the Image points but rather used for the players position.
+- Reset - Triggering this button will reset the given player's position.
+
+#### Debug
+
+This window is used for displaying informations about the state of the application e.g. logic time, mouse position.
 
 ## Build script
 

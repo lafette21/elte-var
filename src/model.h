@@ -27,7 +27,6 @@ public:
     std::string& imagePath() { return _imagePath; }
     cv::Mat& image() { return _image; }
     cv::Mat& pitch() { return _pitch; }
-    vec2& pitchSize() { return _pitchSize; }
     vec2& attackerPos() { return _attackerPos; }
     vec2& defenderPos() { return _defenderPos; }
 
@@ -164,7 +163,6 @@ private:
     std::map<int, cv::Point2f> _pitchPoints;
     std::string _imagePath;
     cv::Mat _image, _pitch, _imageSave, _pitchSave;
-    vec2 _pitchSize = {};
     vec2 _attackerPos = { -1, -1 };
     vec2 _defenderPos = { -1, -1 };
 };
