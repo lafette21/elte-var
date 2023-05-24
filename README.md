@@ -98,6 +98,26 @@ Here a 3D vector transformation is shown. In case of a 2D vector transformation,
 
 ## Business logic
 
+### Main idea
+
+Most of the offside scenarios are happening close to one of the two goal lines. We can observe some
+unique landmarks on the field e.g. line crossings or the penalty spot, which can be used as reference points.
+
+For the homography process we need at least four points (of course more is better) on the scenario image and
+the corresponding points on the reference pitch image. After that, we will have a transformation matrix which
+can be used to map points from one plane to the other. We will use this property because the whole process of
+offside detection can be achieved using one homography search and two perspective transformations.
+
+### Implementation
+
+The business logic can be divided to these high-level steps:
+- Error handling for faulty usage
+- Preprocessing the user's input data for satisfying the OpenCV's algorithm requirements
+- Homography search
+- Perspective transformation of the players coordinates from the loaded scenario to the reference pitch's plane
+- Calculating the offside lines from the players coordinates on the reference pitch's plane parallel to the goal line
+- Perspective transformation of the offside lines from the reference pitch's plane back to the scenario image
+
 ## Graphical User Interface
 
 ### API
